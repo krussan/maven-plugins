@@ -7,6 +7,7 @@
   <groupId>se.qxx.maven-plugins</groupId>
   <artifactId>mssql-loader-plugin</artifactId>
   <version>0.2</version>
+  <packaging>jar</packaging>
 
   <name>mssql-loader-plugin</name>
 
