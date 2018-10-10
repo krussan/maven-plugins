@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extensions>
+  <extension>
+    <groupId>com.microsoft.sqlserver</groupId>
+    <artifactId>mssql-jdbc</artifactId>
+    <version>7.0.0.jre8</version>
+  </extension>
+</extensions>

@@ -6,7 +6,7 @@
 
   <groupId>se.qxx.maven-plugins</groupId>
   <artifactId>mssql-loader-plugin</artifactId>
-  <version>0.3</version>
+  <version>0.8</version>
   <packaging>maven-plugin</packaging>
 
   <name>mssql-loader-plugin</name>
@@ -32,6 +32,12 @@
       <version>3.4</version>
       <scope>provided</scope>
     </dependency>
+	
+	<dependency>
+		<groupId>org.apache.maven</groupId>
+		<artifactId>maven-project</artifactId>
+		<version>2.2.1</version>
+	</dependency>
     
   </dependencies>
 
