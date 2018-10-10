@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.SQLWarning;
+import java.sql.ResultSet;
 
 @Mojo( name = "load")
 public class TSQLTTester extends AbstractMojo
@@ -83,6 +85,9 @@ public class TSQLTTester extends AbstractMojo
 		this.preparationScripts = scripts;
 	}	
 	
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}		
 	
     public void execute() throws MojoExecutionException
     {
@@ -97,11 +102,51 @@ public class TSQLTTester extends AbstractMojo
 				listFilesForFolder(folder, "sql"),
 				true);
 				
-		} catch (IOException | SQLException ex) {
+			test();
+				
+		} catch (TSQLTFailedException tsqltEx) {
+			throw new MojoExecutionException("TSQLT tests failed !!");
+		}
+		catch (IOException | SQLException ex) {
 			ex.printStackTrace();
 			throw new MojoExecutionException("Tsqlt executer failed", ex);
 		}
     }
+	
+	public void test() throws SQLException, TSQLTFailedException {
+		int failCount = 0;
+		
+		Connection conn = DriverManager.getConnection(this.url, this.username, this.password);
+		System.out.println("Running all tests ....");
+		try (Statement stmt = conn.createStatement()) {
+			stmt.execute("EXEC tSQLt.RunAll");
+
+			ResultSet rs = stmt.executeQuery("SELECT [Name], [Result], [Msg] FROM tSQLt.TestResult");
+			while (rs.next()) {
+				String result = rs.getString("Result");
+				String msg = rs.getString("Msg");
+				String testName = rs.getString("Name");
+				
+				System.out.println(String.format("%s %s %s", testName, result, msg));
+			}
+			
+			
+			rs = stmt.executeQuery("SELECT Msg, FailCnt FROm tSQLt.TestCaseSummary()");
+			if (rs.next()) {
+				String msg = rs.getString("Msg");
+				failCount = rs.getInt("FailCnt");
+				
+				System.out.println("");
+				System.out.println(msg);
+			}
+			
+		} catch (SQLException ex) {
+			throw ex;
+		}
+		
+		if (failCount > 0)
+			throw new TSQLTFailedException();
+	}
 	
 	public List<File> listFilesForFolder(File folder, String extension) {
 		List<File> result = new ArrayList<File>();
@@ -145,9 +190,16 @@ public class TSQLTTester extends AbstractMojo
 			for (String statement : statements) {
 				stmt.execute(statement);
 				
+				
 				if (this.debug) {
 					System.out.println(statement);
 					System.out.println("------------------------------------------------------------");
+				}
+				
+				SQLWarning warning = stmt.getWarnings();
+				while (warning != null) {
+					System.out.println(warning.getMessage());
+					warning = warning.getNextWarning();
 				}
 			}
 		} catch (SQLException ex) {
@@ -156,10 +208,19 @@ public class TSQLTTester extends AbstractMojo
 	}
 	
 	public String[] parseFile(String input, boolean parseAwayTests) {
-		Pattern pattern = Pattern.compile(this.delimiter);
+		if (parseAwayTests)
+			input = parseAwayTests(input);
+		
+		Pattern pattern = Pattern.compile(this.delimiter, Pattern.CASE_INSENSITIVE);
 		String[] result = pattern.split(input);
 		
 		return result;
+	}
+	
+	public String parseAwayTests(String input) {
+		Pattern pattern = Pattern.compile("^\\s*EXEC(UTE)?\\s*\\[?tSQLt\\]?\\.\\[?Run\\]?\\s*\\'[^\\']*\\'.*?$", Pattern.DOTALL | Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+		Matcher matcher = pattern.matcher(input);
+		return matcher.replaceAll("");
 	}
 	
 	public String readFile(File f) throws IOException {
