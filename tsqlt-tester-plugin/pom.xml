@@ -6,7 +6,7 @@
 
   <groupId>se.qxx.maven.plugins</groupId>
   <artifactId>tsqlt-tester-plugin</artifactId>
-  <version>0.5</version>
+  <version>0.6</version>
   <packaging>maven-plugin</packaging>
 
   <name>tsqlt-tester-plugin</name>

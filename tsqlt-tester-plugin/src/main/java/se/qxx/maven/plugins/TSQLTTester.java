@@ -9,8 +9,15 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.CallableStatement;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -129,6 +136,7 @@ public class TSQLTTester extends AbstractMojo
 		Connection conn = DriverManager.getConnection(this.url, this.username, this.password);
 		System.out.println("Running all tests ....");
 		try (Statement stmt = conn.createStatement()) {
+			
 			stmt.execute("EXEC tSQLt.RunAll");
 
 			ResultSet rs = stmt.executeQuery("SELECT [Name], [Result], [Msg] FROM tSQLt.TestResult");
@@ -149,6 +157,26 @@ public class TSQLTTester extends AbstractMojo
 				System.out.println("");
 				System.out.println(msg);
 			}
+			
+			// Write result file
+			if (this.resultFile != null && !this.resultFile.equals("")) {
+				CallableStatement cStmt = conn.prepareCall("EXEC tSQLt.XmlResultFormatter");
+
+				boolean hasResult = cStmt.execute();
+				if (hasResult) {
+					rs = stmt.getResultSet();
+					String msg = rs.getString(1);
+				
+					try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+					  new FileOutputStream(this.resultFile), "utf-8"))) {
+					   writer.write(msg);
+					}
+					catch (IOException ex) {
+					  System.out.println("[ERROR] Writing result file failed");
+					}
+				}
+			}
+			
 			
 		} catch (SQLException ex) {
 			throw ex;
