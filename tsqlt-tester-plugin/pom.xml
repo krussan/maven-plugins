@@ -4,9 +4,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>se.qxx.maven-plugins</groupId>
+  <groupId>se.qxx.maven.plugins</groupId>
   <artifactId>tsqlt-tester-plugin</artifactId>
-  <version>0.1</version>
+  <version>0.5</version>
   <packaging>maven-plugin</packaging>
 
   <name>tsqlt-tester-plugin</name>
@@ -19,6 +19,7 @@
 
   <dependencies>
 
+  
 	<dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
@@ -55,31 +56,12 @@
   </dependencies>
 
   <build>
-	<plugins>
+    <plugins>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-plugin-plugin</artifactId>
-            <version>3.4</version>
-            <configuration>
-                <goalPrefix>mysql-jdbc-compliance</goalPrefix>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>default-descriptor</id>
-                    <goals>
-                        <goal>descriptor</goal>
-                    </goals>
-                    <phase>process-classes</phase>
-                </execution>
-                <execution>
-                    <id>help-descriptor</id>
-                    <goals>
-                        <goal>helpmojo</goal>
-                    </goals>
-                    <phase>process-classes</phase>
-                </execution>
-            </executions>
+            <version>3.5</version>
         </plugin>
-    </plugins>  
+	</plugins>
   </build>
 </project>

@@ -25,21 +25,21 @@ import java.sql.Statement;
 import java.sql.SQLWarning;
 import java.sql.ResultSet;
 
-@Mojo( name = "load")
+@Mojo( name = "test")
 public class TSQLTTester extends AbstractMojo
 {
 	private static final String DEFAULT_DELIMITER = "\nGO";
 
-	@Parameter( property = "url" )
+	@Parameter( property = "url", required = true )
 	public String url;
 
-	@Parameter( property = "username" )
+	@Parameter( property = "username", required = true )
 	public String username;
 
-	@Parameter( property = "password" )
+	@Parameter( property = "password" , required = true)
 	public String password;
 	
-	@Parameter( property = "srcpath" )
+	@Parameter( property = "srcpath", required = true )
 	private String srcPath;
 	
 	@Parameter( property = "recurse" )
@@ -56,6 +56,10 @@ public class TSQLTTester extends AbstractMojo
 	
 	@Parameter( property = "preparationScripts" )
 	private String[] preparationScripts;
+	
+	@Parameter( property = "driver" )
+	private String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+
 	
 	public void setUrl(String url) {
 		this.url = url;
@@ -91,11 +95,13 @@ public class TSQLTTester extends AbstractMojo
 	
     public void execute() throws MojoExecutionException
     {
-		File folder = new File(this.srcPath);
 		// Loop through each sql file in the srcPath directory and get content
 		// parse away run statements
 		// run command against an sql connection url
 		try {
+			Class.forName(this.driver);
+			
+			File folder = new File(this.srcPath);
 			executeFiles(this.preparationScripts, false);
 			
 			executeFiles(
@@ -110,6 +116,10 @@ public class TSQLTTester extends AbstractMojo
 		catch (IOException | SQLException ex) {
 			ex.printStackTrace();
 			throw new MojoExecutionException("Tsqlt executer failed", ex);
+		}
+		catch (ClassNotFoundException cex) {
+			cex.printStackTrace();
+			throw new MojoExecutionException("JDBC driver failed to initialize", cex);
 		}
     }
 	
