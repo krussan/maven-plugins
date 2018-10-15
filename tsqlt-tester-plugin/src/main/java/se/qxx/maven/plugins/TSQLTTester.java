@@ -160,19 +160,24 @@ public class TSQLTTester extends AbstractMojo
 			
 			// Write result file
 			if (this.resultFile != null && !this.resultFile.equals("")) {
-				CallableStatement cStmt = conn.prepareCall("EXEC tSQLt.XmlResultFormatter");
+				//Statement cStmt = conn.prepareCall("tSQLt.XmlResultFormatter");
 
-				boolean hasResult = cStmt.execute();
+				boolean hasResult = stmt.execute("EXEC tSQLt.XmlResultFormatter");
+				//boolean hasResult = cStmt.execute();
 				if (hasResult) {
+					System.out.println(String.format("Writing result file %s", this.resultFile));
 					rs = stmt.getResultSet();
-					String msg = rs.getString(1);
-				
-					try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-					  new FileOutputStream(this.resultFile), "utf-8"))) {
-					   writer.write(msg);
-					}
-					catch (IOException ex) {
-					  System.out.println("[ERROR] Writing result file failed");
+					
+					if (rs.next()) {
+						String msg = rs.getString(1);
+					
+						try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+						  new FileOutputStream(this.resultFile), "utf-8"))) {
+						   writer.write(msg);
+						}
+						catch (IOException ex) {
+						  System.out.println("[ERROR] Writing result file failed");
+						}
 					}
 				}
 			}
