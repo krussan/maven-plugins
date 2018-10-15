@@ -171,8 +171,11 @@ public class TSQLTTester extends AbstractMojo
 					if (rs.next()) {
 						String msg = rs.getString(1);
 					
+						File outputFile = new File(this.resultFile);
+						outputFile.getParentFile().mkdirs();
+						
 						try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-						  new FileOutputStream(this.resultFile), "utf-8"))) {
+						  new FileOutputStream(outputFile), "utf-8"))) {
 						   writer.write(msg);
 						}
 						catch (IOException ex) {
