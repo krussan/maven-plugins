@@ -55,7 +55,7 @@ public class TSQLTTester extends AbstractMojo
 	@Parameter( property = "debug" )
 	private boolean debug = false;
 	
-	@Parameter( property = "result" )
+	@Parameter( property = "resultFile" )
 	private String resultFile;
 	
 	@Parameter( property = "delimiter" )
